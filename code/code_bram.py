@@ -104,10 +104,14 @@ print(f"Mean Squared Error (Weighted) exercise 2: {mse_weighted:.4f}")
 # Normalize X_train and X_test
 normalize = lambda matrix: (matrix - np.min(matrix, axis=0)) / (np.max(matrix, axis=0) - np.min(matrix, axis=0)) # Lambda expression
 
-# Get data from breast_cancer dataset
+# Get data from breast_cancer dataset & normalize
 X = breast_cancer.data
 X_norm = normalize(X)
+
+# Get length of train and test sets
 train_len = int(0.7 * len(X_norm))
+
+# Split data
 X_train_norm = X_norm[:train_len, :]
 y_train = breast_cancer.target[:train_len, np.newaxis]
 X_test_norm = X_norm[train_len:, :]
