@@ -81,6 +81,7 @@ def weighted_lsq(X, y, weights):
 # Fit the weighted linear regression model
 weights = counts  # Use counts as weights
 beta_weighted = weighted_lsq(X_unique, y_unique, weights)
+print(beta_weighted)
 
 # Define the prediction function with an intercept
 predict_weighted = lambda X, beta: np.matmul(np.hstack([np.ones((X.shape[0], 1)), X]), beta)
@@ -94,16 +95,23 @@ mse_weighted = mean_squared_error(y_test, y_pred_weighted)
 print(f"Mean Squared Error (Weighted) exercise 2: {mse_weighted:.4f}")
 
 #### Exercise 3: k-NN classification ####
-# Get data from breast_cancer dataset
-X_train = breast_cancer.data[:400, np.newaxis, 3] # Slightly larger than diabetes because more rows
-y_train = breast_cancer.target[:400, np.newaxis]
-X_test = breast_cancer.data[400:, np.newaxis, 3] # Also use 4th feature
-y_test = breast_cancer.target[400:, np.newaxis]
+# # Get data from breast_cancer dataset
+# X_train = breast_cancer.data[:400, np.newaxis, 3] # Slightly larger than diabetes because more rows
+# y_train = breast_cancer.target[:400, np.newaxis]
+# X_test = breast_cancer.data[400:, np.newaxis, 3] # Also use 4th feature
+# y_test = breast_cancer.target[400:, np.newaxis]
 
 # Normalize X_train and X_test
 normalize = lambda matrix: (matrix - np.min(matrix, axis=0)) / (np.max(matrix, axis=0) - np.min(matrix, axis=0)) # Lambda expression
-X_train_norm = normalize(X_train)
-X_test_norm = normalize(X_test)
+
+# Get data from breast_cancer dataset
+X = breast_cancer.data
+X_norm = normalize(X)
+train_len = int(0.7 * len(X_norm))
+X_train_norm = X_norm[:train_len, :]
+y_train = breast_cancer.target[:train_len, np.newaxis]
+X_test_norm = X_norm[train_len:, :]
+y_test = breast_cancer.target[train_len:, np.newaxis]
 
 # Create several functions to do everything in the prediction phase
 # Function to compute distances
@@ -171,24 +179,38 @@ def nearest_neighbors(X_test, X_train, y_train, k, kind="classification"):
     predictions = np.asarray([knn_predict(entry, X_train, y_train, k, kind=kind) for entry in X_test]).reshape(y_test.shape)
     return predictions
 
-# Get data from breast cancer dataset
-X_train = breast_cancer.data[:400, np.newaxis, 3]
-y_train = breast_cancer.target[:400, np.newaxis]
-X_test = breast_cancer.data[400:, np.newaxis, 3]
-y_test = breast_cancer.target[400:, np.newaxis]
+# # Get data from breast cancer dataset
+# X_train = breast_cancer.data[:400, np.newaxis, 3]
+# y_train = breast_cancer.target[:400, np.newaxis]
+# X_test = breast_cancer.data[400:, np.newaxis, 3]
+# y_test = breast_cancer.target[400:, np.newaxis]
 
-# Normalize X_train and X_test
-X_train_norm = normalize(X_train)
-X_test_norm = normalize(X_test)
+# # Normalize X_train and X_test
+# X_train_norm = normalize(X_train)
+# X_test_norm = normalize(X_test)
 
-# Try for k = 5
-k = 5
-y_pred = nearest_neighbors(X_test_norm, X_train_norm, y_train, k)
+# # Try for k = 5
+# k = 5
+# y_pred = nearest_neighbors(X_test_norm, X_train_norm, y_train, k)
 
-# accuracy = lambda y_test, y_pred: 
+# # accuracy = lambda y_test, y_pred: 
 accuracy = lambda y_test, y_pred: len(np.where(y_pred.flatten() == y_test.flatten())[0]) / len(y_test)
 
-print(f"Accuracy exercise 3: {accuracy(y_test, y_pred)}")
+# print(f"Accuracy exercise 3: {accuracy(y_test, y_pred)}")
+
+ks = np.arange(1, 26)
+accuracies = []
+for i, k in enumerate(ks):
+    y_pred = nearest_neighbors(X_test_norm, X_train_norm, y_train, k)
+    accuracies.append(accuracy(y_test, y_pred))
+
+plt.figure()
+plt.plot(ks, accuracies, marker="*", color="blue")
+plt.xlabel('k')
+plt.ylabel("Accuracy")
+plt.grid(True)
+plt.title("KNN Classification on Breast Cancer Dataset")
+plt.show()
 
 #### Exercise 4: k-NN regression ####
 # Get data from diabetes dataset
@@ -222,6 +244,7 @@ plt.legend(loc="best")
 plt.xlabel("k")
 plt.ylabel("MSE")
 plt.title("MSE for Different K-Values (Diabetes Dataset)")
+plt.grid(True)
 plt.show()
 
 #### Exercise 5: Class-conditional probability
